@@ -6,12 +6,14 @@
 
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'firebase_options.dart';
+
 GoogleSignIn _googleSignIn = GoogleSignIn(
-  // Optional clientId
-  // clientId: '479882132969-9i9aqik3jfjd7qhci1nqf0bm2g71rm1u.apps.googleusercontent.com',
   scopes: <String>['email'],
 );
 
@@ -34,8 +36,6 @@ class SignInDemo extends StatefulWidget {
 class SignInDemoState extends State<SignInDemo> {
   GoogleSignInAccount? _currentUser;
 
-  // String _contactText = '';
-
   @override
   void initState() {
     super.initState();
@@ -43,16 +43,10 @@ class SignInDemoState extends State<SignInDemo> {
       setState(() {
         _currentUser = account;
       });
-      // if (_currentUser != null) {
-      //   _handleGetContact(_currentUser!);
-      // }
     });
+
     _googleSignIn.signInSilently();
   }
-
-  // Future<String> loadAsset() async {
-  //   return await rootBundle.loadString('assets/and_logo_square');
-  // }
 
   Future<void> _handleSignIn() async {
     try {
@@ -63,6 +57,17 @@ class SignInDemoState extends State<SignInDemo> {
   }
 
   Future<void> _handleSignOut() => _googleSignIn.disconnect();
+
+  Future<void> main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+// Ideal time to initialize
+    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+//...
+  }
 
   Widget _buildBody() {
     final GoogleSignInAccount? user = _currentUser;
@@ -78,15 +83,10 @@ class SignInDemoState extends State<SignInDemo> {
             subtitle: Text(user.email),
           ),
           const Text('Signed in successfully.'),
-          // Text(_contactText),
           ElevatedButton(
             onPressed: _handleSignOut,
             child: const Text('SIGN OUT'),
           ),
-          // ElevatedButton(
-          //   child: const Text('REFRESH'),
-          //   onPressed: () => _handleGetContact(user),
-          // ),
         ],
       );
     } else {
